@@ -255,3 +255,134 @@ function populate5DayForecast(secondCallData) {
         weeklyFlexContainerEL.appendChild(eachDayContainer);
     };
 };
+
+var getWeatherData = function (event , cityClicked) {
+    // Prevent multiple clickes when city entered at search bar or list of cities.
+    event.preventDefault() 
+
+    if (cityClicked) {
+         // get value from input elementgit 
+        // *** var searchByCity = cityClicked.trim().toLowerCase();
+        var searchByCity = cityClicked.trim();
+        //console.log("The selected by user is: " + searchByCity);
+        //alert("This is a click coming from the list as " + searchByCity);
+    } else { // City has been entered from the search bar
+        // get value from input elementgit 
+        // *** var searchByCity = searchByCityEl.value.trim().toLowerCase();
+        var searchByCity = searchByCityEl.value.trim();
+        //console.log("The selected by user is: " + searchByCity);
+        //alert("This is a click coming from the search bar as " + searchByCity);
+    };
+
+    // If field emtpy to not fetch any data
+    if (searchByCity == "") {
+        alert("Please do not leave city name blank");
+        searchByCityEl.value = "";
+        return 
+    } else {  // Field is not empty, lets clear it and proceed
+        searchByCityEl.value = "";
+    };
+     
+    // Get array from local storage
+    let citiesLocalStorage = JSON.parse(localStorage.getItem("savedCities"));
+
+    // City exist or not. 0 = not, 1 = yes
+    let cityExist = 0;
+
+    // Check if array is null and create new one again.
+    if (citiesLocalStorage === null) {
+        citiesSearched =  new Array();
+        //console.log("new array craeted");
+    } else { // Assign the localStorage values to new (array), not a reference
+        citiesSearched = citiesLocalStorage;
+        //console.log("Values from local Storage are: " + citiesSearched);
+    };
+
+    // First API call to get latitude and longitude for the oncall api
+    let openWeatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + searchByCity + "&appid=32a27c42260b02de3ba5e1466def4861&units=imperial";
+
+    fetch(  // Make a fetch request to Wikipedia to get a random article title
+      openWeatherApiUrl
+    ).then(function (weatherResponse) {
+        
+        if(weatherResponse.ok) { 
+        return weatherResponse.json();
+        } else {
+            // Any other response like 400 500 will display the error.
+            window.alert("Error: " + weatherResponse.statusText + "\nPlease re-enter a valid city");
+            // Clear the input parameter from the user
+            searchByCityEl.value = "";
+            return;
+        }
+    }).then(function (weatherLatLon) {
+        // *** Current day Data *** //
+        let latNum = weatherLatLon.coord.lat;
+        let lonNum = weatherLatLon.coord.lon;
+        let unixTimeCurrentDay = weatherLatLon.dt
+        let currentDayIcon = weatherLatLon.weather[0].icon // Icon for the current day
+        let currentTempImperial = weatherLatLon.main.temp // Temperature 
+        let currentHumidity = weatherLatLon.main.humidity // Humidity
+        let currentMPS = weatherLatLon.wind.speed
+        let mphWindSpeed = Math.round(currentMPS * 2.237) // MPH
+
+        
+        // Add the sucessful api call city to the local storage.
+        // Validate if city is new.
+        for (i=0; i < citiesSearched.length; i++) {
+            if (searchByCity.toLowerCase() === citiesSearched[i].toLowerCase()) {
+                //console.log("city " + citiesSearched[i] + "already exist in array")
+                cityExist =1
+                break;
+            };
+        };
+        // if the city is new it will add it because the lenght of the array was 0, then add to local storage
+        // if it is the second city and is not new then add to local storage
+        if (cityExist === 0) {
+            // Take a word and coverted to capitalizaion case --> Credits to https://stackoverflow.com/questions/32589197/how-can-i-capitalize-the-first-letter-of-each-word-in-a-string-using-javascript
+            //  – Patrick Michaelsen
+            citiesSearched.push(searchByCity.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' '));
+            
+            // Save to local storage
+            localStorage.setItem("savedCities", JSON.stringify(citiesSearched));
+        }
+
+        // Pass all the information already gathered for the 5 day forecast and the html build
+        // Pass searchByCity to the second call as capitalized case
+        fetchSecondCall(searchByCity.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' '), latNum, lonNum, unixTimeCurrentDay, currentDayIcon, currentTempImperial, currentHumidity, currentMPS, mphWindSpeed);
+      
+        // *** After all items have been pushed to array populate the cities in html
+        // There is no functionality to clear cities, but it can be added.
+        // You can also delete the savedCities Key using Chrome Dev Tools.
+        // citiesSearched = []; 
+        populateSavedCities(); // Second after a push has been done.
+      }).catch(function(error) { // fetch api way of handling network errors.
+        // Notice this `.catch()` getting chained onto the end of the `.then()` method
+        //alert("Unable to connect to OpenWeather");
+        //alert(error.response)
+        return;
+      });
+
+};
+
+// Event listener for searching manually and clicking the magnifiying glass.
+seachEventHanglerEl.addEventListener("submit",getWeatherData);
+
+// Funciton to handle the event from the list of cities when clicked.
+var cityClicked = function (event) {
+    // User data value sfrom data-city to know which element was clicked and gets its value
+    // Value will then be passed to our main funciton to get api data.
+    let cityClicked = event.target.getAttribute("data-city")
+    if (cityClicked){
+        getWeatherData(event, cityClicked);
+        //alert(cityClicked)
+    } else { // If the value is empty, it should not happen but it is a failsafe.
+        alert("Internal erro found, please email esroleo@gmail.com.\nPlease provide story of issue in order for it to be fixed");
+    };
+};
+
+// Event listener for the cities incase they are clicked.
+//citiesListContainerEl.addEventListener("click",  cityClicked);
+citiesContainerEl.addEventListener("click", cityClicked)
+
+// Load saved cities to the saved cities section.
+populateSavedCities(); // First call to load the saved cities html.
