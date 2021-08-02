@@ -1,0 +1,17 @@
+/* Remove default html margin, padding and assign box-sizinz as border-box to all */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    color: whitesmoke;
+    background-color: #47474d;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+}
+
