@@ -104,3 +104,80 @@ outline: none !important;
 .forcast-padding {
     padding-bottom: 10px;
 }
+
+/* This will be applied on any screen smaller than 768px */
+@media screen and (max-width: 1330px) {
+
+  h3 {
+    font-size: 20px;
+  }
+
+}
+
+/* This will be applied on any screen smaller than 768px */
+@media screen and (max-width: 1025px) {
+
+  h3 {
+    font-size: 20px;
+  }
+
+
+  .form-input {
+    flex-grow: 1;
+
+  }
+
+  .btn {
+    margin-top: 5px;
+    margin-bottom: 1;
+    flex-grow: 1;
+    }
+  
+}
+
+/* This will be applied on any screen smaller than 768px */
+@media screen and (max-width: 900px) {
+
+  h3 {
+    font-size: 20px;
+  }
+
+
+
+
+}
+
+/* This will be applied on any screen smaller than 768px */
+@media screen and (max-width: 768px) {
+
+  h3 {
+    font-size: 21px;
+  }
+
+  img {
+    width: 25%;
+  }
+
+  .form-input {
+    width: 100%;
+  }
+
+
+  .btn {
+  margin-top: 5px;
+  margin-bottom: 1;
+  flex-grow: 1;
+  }
+
+  .weekly-flex-conatiner{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content:center;
+  }
+
+  .border-div-five-day-forecast {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-bottom: 5px;
+  }
+}
